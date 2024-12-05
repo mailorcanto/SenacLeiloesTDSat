@@ -72,6 +72,62 @@ public class ProdutosDAO {
         }
         return listagem;
     }
+    
+    public boolean venderProduto(int id) {
+        String sql = "UPDATE produtos SET status = ? WHERE id = ?";
+        try {
+            conn = new conectaDAO().connectDB();
+            prep = conn.prepareStatement(sql);
+            prep.setString(1, "Vendido"); // Define o novo status
+            prep.setInt(2, id); // Define o ID do produto
+
+            int rowsUpdated = prep.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(null, "Produto vendido com sucesso!");
+                return true;
+            } else {
+                JOptionPane.showMessageDialog(null, "Nenhum produto encontrado com o ID informado.");
+                return false;
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao vender produto: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (prep != null) prep.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Erro ao fechar conexão: " + e.getMessage());
+            }
+        }
+    }
+
+    
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+        String sql = "SELECT id, nome, valor, status FROM produtos WHERE status = 'Vendido'";
+        ArrayList<ProdutosDTO> listagem = new ArrayList<>();
+
+        try {
+            conn = new conectaDAO().connectDB();
+            PreparedStatement stmt = this.conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()){
+                ProdutosDTO produto = new ProdutosDTO();
+
+                produto.setId(rs.getInt("id"));
+                produto.setNome(rs.getString("nome"));
+                produto.setValor(rs.getInt("valor"));
+                produto.setStatus(rs.getString("status"));
+
+                listagem.add(produto);
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return listagem;
+        }
+
 }
 
 
